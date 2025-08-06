@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   LayoutDashboard, 
   Package, 
@@ -18,27 +19,27 @@ import {
 } from 'lucide-react'
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', active: true },
-  { icon: Package, label: 'Products' },
-  { icon: Heart, label: 'Favorites' },
-  { icon: Inbox, label: 'Inbox' },
-  { icon: Bell, label: 'Notification' },
-  { icon: Users, label: 'Product Stack' },
+  { icon: LayoutDashboard, label: 'Dashboard', active: true, path: '/' },
+  { icon: Package, label: 'Products', path: '/product-label' },
+  { icon: Inbox, label: 'Inbox', path: '/inbox' },
+  { icon: Bell, label: 'Notification', path: '/notification' },
+  { icon: Users, label: 'Product Stack', path: '/product-stack' },
 ]
 
 const pagesItems = [
-  { icon: Target, label: 'Pricing' },
-  { icon: Calendar, label: 'Calendar' },
-  { icon: Table, label: 'To-Do' },
-  { icon: Users, label: 'Contact' },
-  { icon: FileText, label: 'Invoice' },
-  { icon: Grid, label: 'UI Elements' },
-  { icon: Users, label: 'Team' },
-  { icon: Table, label: 'Table' },
+  { icon: Target, label: 'Pricing', path: '/pricing' },
+  { icon: Calendar, label: 'Calendar', path: '/calendar' },
+  { icon: Table, label: 'To-Do', path: '/todo' },
+  { icon: Users, label: 'Contact', path: '/contact' },
+  { icon: FileText, label: 'Invoice', path: '/invoice' },
+  { icon: Grid, label: 'UI Elements', path: '/ui-elements' },
+  { icon: Users, label: 'Team', path: '/team' },
+  { icon: Table, label: 'Table', path: '/table' },
 ]
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false)
+  const router = useRouter()
 
   return (
     <>
@@ -73,6 +74,7 @@ export default function Sidebar() {
               {menuItems.map((item) => (
                 <li key={item.label}>
                   <button
+                    onClick={() => router.push(item.path)}
                     className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                       item.active
                         ? 'bg-primary text-white'
@@ -94,7 +96,10 @@ export default function Sidebar() {
             <ul className="space-y-1">
               {pagesItems.map((item) => (
                 <li key={item.label}>
-                  <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button
+                    onClick={() => router.push(item.path)}
+                    className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
                     <item.icon className="w-5 h-5 mr-3" />
                     {item.label}
                   </button>

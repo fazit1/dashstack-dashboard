@@ -1,12 +1,19 @@
 'use client'
 
-import { Users, ShoppingCart, DollarSign, Clock } from 'lucide-react'
+import { Users, ShoppingCart, DollarSign, Clock, Package } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Header from '@/components/Header'
 import StatCard from '@/components/StatCard'
 import SalesChart from '@/components/SalesChart'
 
 export default function Dashboard() {
+  const router = useRouter()
+
+  const handleProductClick = () => {
+    router.push('/product-label')
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
