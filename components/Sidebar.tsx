@@ -15,14 +15,15 @@ import {
   FileText,
   Target,
   Grid,
-  Menu
+  Menu,
+  User2
 } from 'lucide-react'
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', active: true, path: '/' },
   { icon: Package, label: 'Products', path: '/product-label' },
   { icon: Inbox, label: 'Inbox', path: '/inbox' },
-  { icon: Bell, label: 'Notification', path: '/notification' },
+  { icon: User2, label: 'Pilot', path: '/pilot' },
   { icon: Users, label: 'Product Stack', path: '/product-stack' },
 ]
 
