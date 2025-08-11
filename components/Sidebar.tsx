@@ -22,8 +22,9 @@ import {
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', active: true, path: '/' },
   { icon: Package, label: 'Products', path: '/product-label' },
-  { icon: Inbox, label: 'Inbox', path: '/inbox' },
+  { icon: Inbox, label: 'Request', path: '/inbox' },
   { icon: User2, label: 'Pilot', path: '/pilot' },
+  { icon: User2, label: 'Request Pilot', path: '/request_pilot' },
   { icon: Users, label: 'Product Stack', path: '/product-stack' },
 ]
 
