@@ -26,6 +26,7 @@ const menuItems = [
   { icon: User2, label: 'Pilot', path: '/pilot' },
   { icon: User2, label: 'Request Pilot', path: '/request_pilot' },
   { icon: Users, label: 'Product Stack', path: '/product-stack' },
+  { icon: Users, label: 'Service Request', path: '/service-request' },
 ]
 
 const pagesItems = [
