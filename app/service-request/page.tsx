@@ -14,6 +14,22 @@ interface ServiceRequest {
   pilot_on: string;
   pilot_off: string;
   next_port: string;
+  
+  // New fields
+  doc_number: number;
+  master: string;
+  agency: string;
+  LOA: number;
+  FROM: string;
+  TO: string;
+  last_port: string;
+  tug_service_id: number;
+  note: string;
+  amount: number;
+  submitted_by: string;
+  submit_time: string;
+  created_by: string;
+  createdat: string;
 }
 
 export default function ServiceRequestPage() {
@@ -30,7 +46,21 @@ export default function ServiceRequestPage() {
     status: 'DRAFT',
     pilot_on: '',
     pilot_off: '',
-    next_port: ''
+    next_port: '',
+    doc_number: 0,
+    master: '',
+    agency: '',
+    LOA: 0,
+    FROM: '',
+    TO: '',
+    last_port: '',
+    tug_service_id: 0,
+    note: '',
+    amount: 0,
+    submitted_by: '',
+    submit_time: '',
+    created_by: '',
+    createdat: ''
   });
 
   const statuses = ['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED'] as const;
@@ -38,8 +68,10 @@ export default function ServiceRequestPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    if (name === 'id_jasa') {
+    if (name === 'id_jasa' || name === 'doc_number' || name === 'LOA' || name === 'tug_service_id') {
       setFormData(prev => ({ ...prev, [name]: parseInt(value) || 0 }));
+    } else if (name === 'amount') {
+      setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -76,7 +108,21 @@ export default function ServiceRequestPage() {
       status: 'DRAFT',
       pilot_on: '',
       pilot_off: '',
-      next_port: ''
+      next_port: '',
+      doc_number: 0,
+      master: '',
+      agency: '',
+      LOA: 0,
+      FROM: '',
+      TO: '',
+      last_port: '',
+      tug_service_id: 0,
+      note: '',
+      amount: 0,
+      submitted_by: '',
+      submit_time: '',
+      created_by: '',
+      createdat: ''
     });
     setShowForm(false);
     setEditingId(null);
@@ -107,136 +153,200 @@ export default function ServiceRequestPage() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Request Service</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Request Service</h1>
               <p className="text-gray-600">Kelola permintaan layanan kapal</p>
             </div>
 
             {/* Action Buttons */}
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Daftar Permintaan Layanan</h2>
+            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-lg md:text-xl font-semibold text-gray-900">Daftar Permintaan Layanan</h2>
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center"
+                className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center"
               >
                 <FiPlus className="mr-2" />
                 Tambah Baru
               </button>
             </div>
 
-            {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID Jasa
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nama Kapal
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Pilot
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Pilot On
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Pilot Off
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Next Port
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {serviceRequests.length === 0 ? (
+            {/* Desktop Table View */}
+            <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
-                        Tidak ada data permintaan layanan
-                      </td>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ID Jasa
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nama Kapal
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Pilot
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Pilot On
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Pilot Off
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Next Port
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Aksi
+                      </th>
                     </tr>
-                  ) : (
-                    serviceRequests.map((request) => (
-                      <tr key={request.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {request.id_jasa}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {request.ship_name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {request.pilot}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                            request.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                            request.status === 'SUBMITTED' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {request.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {request.pilot_on ? new Date(request.pilot_on).toLocaleString('id-ID') : '-'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {request.pilot_off ? new Date(request.pilot_off).toLocaleString('id-ID') : '-'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {request.next_port}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleView(request)}
-                              className="text-blue-600 hover:text-blue-900"
-                              title="Lihat Detail"
-                            >
-                              <FiEye className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleEdit(request)}
-                              className="text-yellow-600 hover:text-yellow-900"
-                              title="Edit"
-                            >
-                              <FiEdit className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(request.id)}
-                              className="text-red-600 hover:text-red-900"
-                              title="Hapus"
-                            >
-                              <FiTrash2 className="h-4 w-4" />
-                            </button>
-                          </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {serviceRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
+                          Tidak ada data permintaan layanan
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      serviceRequests.map((request) => (
+                        <tr key={request.id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.id_jasa}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.ship_name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.pilot}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                              request.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                              request.status === 'SUBMITTED' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {request.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.pilot_on ? new Date(request.pilot_on).toLocaleString('id-ID') : '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.pilot_off ? new Date(request.pilot_off).toLocaleString('id-ID') : '-'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.next_port}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleView(request)}
+                                className="text-blue-600 hover:text-blue-900"
+                                title="Lihat Detail"
+                              >
+                                <FiEye className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleEdit(request)}
+                                className="text-yellow-600 hover:text-yellow-900"
+                                title="Edit"
+                              >
+                                <FiEdit className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(request.id)}
+                                className="text-red-600 hover:text-red-900"
+                                title="Hapus"
+                              >
+                                <FiTrash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {serviceRequests.length === 0 ? (
+                <div className="bg-white rounded-lg shadow p-6 text-center">
+                  <p className="text-gray-500">Tidak ada data permintaan layanan</p>
+                </div>
+              ) : (
+                serviceRequests.map((request) => (
+                  <div key={request.id} className="bg-white rounded-lg shadow p-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">{request.ship_name}</h3>
+                          <p className="text-sm text-gray-600">ID Jasa: {request.id_jasa}</p>
+                        </div>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                          request.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                          request.status === 'SUBMITTED' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {request.status}
+                        </span>
+                      </div>
+                      
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <p><span className="font-medium">Pilot:</span> {request.pilot}</p>
+                        <p><span className="font-medium">Next Port:</span> {request.next_port}</p>
+                        <p><span className="font-medium">Pilot On:</span> {request.pilot_on ? new Date(request.pilot_on).toLocaleString('id-ID') : '-'}</p>
+                        <p><span className="font-medium">Pilot Off:</span> {request.pilot_off ? new Date(request.pilot_off).toLocaleString('id-ID') : '-'}</p>
+                      </div>
+                      
+                      {/* Mobile Action Buttons */}
+                      <div className="flex space-x-2 pt-3 border-t">
+                        <button
+                          onClick={() => handleView(request)}
+                          className="flex-1 bg-blue-500 text-white py-2 px-3 rounded-md text-sm flex items-center justify-center"
+                        >
+                          <FiEye className="mr-1" />
+                          Detail
+                        </button>
+                        <button
+                          onClick={() => handleEdit(request)}
+                          className="flex-1 bg-yellow-500 text-white py-2 px-3 rounded-md text-sm flex items-center justify-center"
+                        >
+                          <FiEdit className="mr-1" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(request.id)}
+                          className="flex-1 bg-red-500 text-white py-2 px-3 rounded-md text-sm flex items-center justify-center"
+                        >
+                          <FiTrash2 className="mr-1" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Form Modal */}
             {showForm && (
               <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div className="relative top-20 mx-auto p-4 md:p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
                   <div className="mt-3">
                     <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
                       {editingId ? 'Edit Permintaan Layanan' : 'Tambah Permintaan Layanan'}
                     </h3>
                     
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">ID Jasa</label>
                         <input
@@ -321,6 +431,176 @@ export default function ServiceRequestPage() {
                         />
                       </div>
 
+                      {/* New fields start */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Doc Number</label>
+                        <input
+                          type="number"
+                          name="doc_number"
+                          value={formData.doc_number}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Master</label>
+                        <input
+                          type="text"
+                          name="master"
+                          value={formData.master}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Agency</label>
+                        <input
+                          type="text"
+                          name="agency"
+                          value={formData.agency}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">LOA</label>
+                        <input
+                          type="number"
+                          name="LOA"
+                          value={formData.LOA}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">FROM</label>
+                        <input
+                          type="text"
+                          name="FROM"
+                          value={formData.FROM}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">TO</label>
+                        <input
+                          type="text"
+                          name="TO"
+                          value={formData.TO}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Last Port</label>
+                        <input
+                          type="text"
+                          name="last_port"
+                          value={formData.last_port}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Tug Service ID</label>
+                        <input
+                          type="number"
+                          name="tug_service_id"
+                          value={formData.tug_service_id}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Note</label>
+                        <input
+                          type="text"
+                          name="note"
+                          value={formData.note}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Amount</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          name="amount"
+                          value={formData.amount}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Submitted By</label>
+                        <input
+                          type="text"
+                          name="submitted_by"
+                          value={formData.submitted_by}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Submit Time</label>
+                        <input
+                          type="datetime-local"
+                          name="submit_time"
+                          value={formData.submit_time}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Created By</label>
+                        <input
+                          type="text"
+                          name="created_by"
+                          value={formData.created_by}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Created At</label>
+                        <input
+                          type="datetime-local"
+                          name="createdat"
+                          value={formData.createdat}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
                       <div className="flex justify-end space-x-2 pt-4">
                         <button
                           type="button"
@@ -347,7 +627,7 @@ export default function ServiceRequestPage() {
             {/* Detail Modal */}
             {viewingId && (
               <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div className="relative top-20 mx-auto p-4 md:p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
                   <div className="mt-3">
                     <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
                       Detail Permintaan Layanan
@@ -358,7 +638,7 @@ export default function ServiceRequestPage() {
                       if (!request) return null;
                       
                       return (
-                        <div className="space-y-3">
+                        <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
                           <div>
                             <span className="font-medium">ID Jasa:</span> {request.id_jasa}
                           </div>
@@ -379,6 +659,50 @@ export default function ServiceRequestPage() {
                           </div>
                           <div>
                             <span className="font-medium">Next Port:</span> {request.next_port}
+                          </div>
+                          
+                          {/* New fields in detail view */}
+                          <div>
+                            <span className="font-medium">Doc Number:</span> {request.doc_number}
+                          </div>
+                          <div>
+                            <span className="font-medium">Master:</span> {request.master}
+                          </div>
+                          <div>
+                            <span className="font-medium">Agency:</span> {request.agency}
+                          </div>
+                          <div>
+                            <span className="font-medium">LOA:</span> {request.LOA}
+                          </div>
+                          <div>
+                            <span className="font-medium">FROM:</span> {request.FROM}
+                          </div>
+                          <div>
+                            <span className="font-medium">TO:</span> {request.TO}
+                          </div>
+                          <div>
+                            <span className="font-medium">Last Port:</span> {request.last_port}
+                          </div>
+                          <div>
+                            <span className="font-medium">Tug Service ID:</span> {request.tug_service_id}
+                          </div>
+                          <div>
+                            <span className="font-medium">Note:</span> {request.note}
+                          </div>
+                          <div>
+                            <span className="font-medium">Amount:</span> {request.amount}
+                          </div>
+                          <div>
+                            <span className="font-medium">Submitted By:</span> {request.submitted_by}
+                          </div>
+                          <div>
+                            <span className="font-medium">Submit Time:</span> {request.submit_time ? new Date(request.submit_time).toLocaleString('id-ID') : '-'}
+                          </div>
+                          <div>
+                            <span className="font-medium">Created By:</span> {request.created_by}
+                          </div>
+                          <div>
+                            <span className="font-medium">Created At:</span> {request.createdat ? new Date(request.createdat).toLocaleString('id-ID') : '-'}
                           </div>
                           
                           <div className="flex justify-end pt-4">
