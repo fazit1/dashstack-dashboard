@@ -16,6 +16,8 @@ interface ShipRequest {
   status: 'pending' | 'approved' | 'rejected'
   description: string
   estimatedDuration: string
+  cargo: string
+  weight: string
 }
 
 const mockRequests: ShipRequest[] = [
@@ -29,7 +31,9 @@ const mockRequests: ShipRequest[] = [
     priority: 'high',
     status: 'pending',
     description: 'Urgent cargo delivery for medical supplies',
-    estimatedDuration: '3 days'
+    estimatedDuration: '3 days',
+    cargo: 'Medical Supplies',
+    weight: '45,000 tons'
   },
   {
     id: '2',
@@ -41,7 +45,9 @@ const mockRequests: ShipRequest[] = [
     priority: 'medium',
     status: 'pending',
     description: 'Regular passenger service route',
-    estimatedDuration: '2 hours'
+    estimatedDuration: '2 hours',
+    cargo: 'Passengers',
+    weight: '2,500 tons'
   },
   {
     id: '3',
@@ -53,7 +59,9 @@ const mockRequests: ShipRequest[] = [
     priority: 'high',
     status: 'approved',
     description: 'Crude oil shipment for refinery',
-    estimatedDuration: '5 days'
+    estimatedDuration: '5 days',
+    cargo: 'Crude Oil',
+    weight: '120,000 tons'
   },
   {
     id: '4',
@@ -65,13 +73,45 @@ const mockRequests: ShipRequest[] = [
     priority: 'low',
     status: 'pending',
     description: 'Weekly supply delivery to island communities',
-    estimatedDuration: '1 day'
+    estimatedDuration: '1 day',
+    cargo: 'Supplies',
+    weight: '8,500 tons'
+  },
+  {
+    id: '5',
+    shipName: 'SS Pacific Star',
+    pilotName: 'Capt. Robert Wilson',
+    missionType: 'Container Transport',
+    location: 'Singapore - Jakarta',
+    requestedDate: '2024-01-15',
+    priority: 'high',
+    status: 'pending',
+    description: 'Container shipment with electronics',
+    estimatedDuration: '4 days',
+    cargo: 'Electronics',
+    weight: '65,000 tons'
+  },
+  {
+    id: '6',
+    shipName: 'MV Coral Princess',
+    pilotName: 'Capt. Emma Davis',
+    missionType: 'Passenger Cruise',
+    location: 'Bali - Komodo',
+    requestedDate: '2024-01-14',
+    priority: 'medium',
+    status: 'approved',
+    description: 'Luxury cruise passenger service',
+    estimatedDuration: '3 days',
+    cargo: 'Passengers',
+    weight: '15,000 tons'
   }
 ]
 
 export default function InboxPage() {
   const [requests, setRequests] = useState<ShipRequest[]>(mockRequests)
   const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected'>('pending')
+  const [sortBy, setSortBy] = useState<'date' | 'priority' | 'name'>('date')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   const handleStatusUpdate = (id: string, newStatus: 'approved' | 'rejected') => {
     setRequests(prev => prev.map(req => 
@@ -79,9 +119,27 @@ export default function InboxPage() {
     ))
   }
 
-  const filteredRequests = requests.filter(req => 
-    req.status === filter
-  )
+  const filteredRequests = requests.filter(req => req.status === filter)
+
+  const sortedRequests = [...filteredRequests].sort((a, b) => {
+    switch (sortBy) {
+      case 'date':
+        return sortOrder === 'asc' 
+          ? new Date(a.requestedDate).getTime() - new Date(b.requestedDate).getTime()
+          : new Date(b.requestedDate).getTime() - new Date(a.requestedDate).getTime()
+      case 'priority':
+        const priorityOrder = { high: 3, medium: 2, low: 1 }
+        return sortOrder === 'asc'
+          ? priorityOrder[a.priority] - priorityOrder[b.priority]
+          : priorityOrder[b.priority] - priorityOrder[a.priority]
+      case 'name':
+        return sortOrder === 'asc'
+          ? a.shipName.localeCompare(b.shipName)
+          : b.shipName.localeCompare(a.shipName)
+      default:
+        return 0
+    }
+  })
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -92,25 +150,29 @@ export default function InboxPage() {
     }
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'text-green-600 bg-green-100'
+      case 'rejected': return 'text-red-600 bg-red-100'
+      default: return 'text-yellow-600 bg-yellow-100'
+    }
+  }
+
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved': return <CheckCircle className="w-5 h-5 text-green-600" />
-      case 'rejected': return <XCircle className="w-5 h-5 text-red-600" />
-      default: return <AlertCircle className="w-5 h-5 text-yellow-600" />
+      case 'approved': return <CheckCircle className="w-4 h-4" />
+      case 'rejected': return <XCircle className="w-4 h-4" />
+      default: return <AlertCircle className="w-4 h-4" />
     }
   }
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
       <Sidebar />
       
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <Header />
         
-        {/* Inbox Content */}
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
             {/* Page Title */}
@@ -119,102 +181,205 @@ export default function InboxPage() {
               <p className="text-gray-600">Manage and review requests from ship guides and pilots</p>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="mb-6">
-              <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8">
-                  {(['pending', 'approved', 'rejected'] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setFilter(tab)}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
-                        filter === tab
-                          ? 'border-primary text-primary'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      {tab} ({requests.filter(r => r.status === tab).length})
-                    </button>
-                  ))}
-                </nav>
-              </div>
-            </div>
-
-            {/* Requests Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredRequests.map((request) => (
-                <div key={request.id} className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
-                  <div className="flex items-center mb-4">
-                    <div className="p-3 bg-blue-100 rounded-lg mr-4">
-                      <Ship className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{request.shipName}</h3>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(request.priority)}`}>
-                        {request.priority.toUpperCase()}
-                      </span>
-                    </div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Ship className="w-6 h-6 text-blue-600" />
                   </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <User className="w-4 h-4 mr-2" />
-                      <span>Pilot: {request.pilotName}</span>
-                    </div>
-                    
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      <span>Route: {request.location}</span>
-                    </div>
-                    
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      <span>Requested: {new Date(request.requestedDate).toLocaleDateString()}</span>
-                    </div>
-                    
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Clock className="w-4 h-4 mr-2" />
-                      <span>Duration: {request.estimatedDuration}</span>
-                    </div>
-                  </div>
-
-                  <p className="mt-4 text-sm text-gray-700">{request.description}</p>
-
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon(request.status)}
-                      <span className="text-sm font-medium text-gray-900 capitalize">{request.status}</span>
-                    </div>
-                    
-                    {request.status === 'pending' && (
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleStatusUpdate(request.id, 'approved')}
-                          className="px-3 py-1 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(request.id, 'rejected')}
-                          className="px-3 py-1 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 transition-colors"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Total Requests</p>
+                    <p className="text-2xl font-bold text-gray-900">{requests.length}</p>
                   </div>
                 </div>
-              ))}
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <AlertCircle className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Pending</p>
+                    <p className="text-2xl font-bold text-gray-900">{requests.filter(r => r.status === 'pending').length}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Approved</p>
+                    <p className="text-2xl font-bold text-gray-900">{requests.filter(r => r.status === 'approved').length}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex items-center">
+                  <div className="p-2 bg-red-100 rounded-lg">
+                    <XCircle className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Rejected</p>
+                    <p className="text-2xl font-bold text-gray-900">{requests.filter(r => r.status === 'rejected').length}</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Empty State */}
-            {filteredRequests.length === 0 && (
-              <div className="text-center py-12">
-                <Ship className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
-                <p className="text-gray-600">There are no requests matching your current filter.</p>
+            {/* Controls */}
+            <div className="bg-white rounded-lg shadow mb-6">
+              <div className="p-4 border-b border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  {/* Filter Tabs */}
+                  <div className="border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-8">
+                      {(['pending', 'approved', 'rejected'] as const).map((tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => setFilter(tab)}
+                          className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
+                            filter === tab
+                              ? 'border-primary text-primary'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          {tab} ({requests.filter(r => r.status === tab).length})
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+
+                  {/* Sort Controls */}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium text-gray-700">Sort by:</label>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as 'date' | 'priority' | 'name')}
+                        className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+                      >
+                        <option value="date">Date</option>
+                        <option value="priority">Priority</option>
+                        <option value="name">Name</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="text-sm text-gray-600 hover:text-gray-900"
+                    >
+                      {sortOrder === 'asc' ? '↑' : '↓'}
+                    </button>
+                  </div>
+                </div>
               </div>
-            )}
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Ship Details
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Pilot/Captain
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Route & Cargo
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Priority
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {sortedRequests.map((request) => (
+                      <tr key={request.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <Ship className="h-5 w-5 text-blue-600" />
+                              </div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{request.shipName}</div>
+                              <div className="text-sm text-gray-500">{request.missionType}</div>
+                              <div className="text-xs text-gray-400">
+                                {new Date(request.requestedDate).toLocaleDateString('id-ID')}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{request.pilotName}</div>
+                          <div className="text-sm text-gray-500">Duration: {request.estimatedDuration}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">{request.location}</div>
+                          <div className="text-sm text-gray-500">{request.cargo} ({request.weight})</div>
+                          <div className="text-xs text-gray-400 mt-1">{request.description}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(request.priority)}`}>
+                            {request.priority.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                            {getStatusIcon(request.status)}
+                            <span className="ml-1">{request.status.toUpperCase()}</span>
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {request.status === 'pending' && (
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleStatusUpdate(request.id, 'approved')}
+                                className="text-green-600 hover:text-green-900"
+                                title="Approve"
+                              >
+                                <CheckCircle className="w-5 h-5" />
+                              </button>
+                              <button
+                                onClick={() => handleStatusUpdate(request.id, 'rejected')}
+                                className="text-red-600 hover:text-red-900"
+                                title="Reject"
+                              >
+                                <XCircle className="w-5 h-5" />
+                              </button>
+                            </div>
+                          )}
+                          {request.status !== 'pending' && (
+                            <span className="text-gray-400 text-xs">
+                              {request.status === 'approved' ? 'Approved' : 'Rejected'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Empty State */}
+              {sortedRequests.length === 0 && (
+                <div className="text-center py-12">
+                  <Ship className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
+                  <p className="text-gray-600">There are no requests matching your current filter.</p>
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </div>
