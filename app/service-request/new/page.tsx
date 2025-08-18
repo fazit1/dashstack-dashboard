@@ -19,17 +19,19 @@ export default function NewServicePage() {
     activity: "Berthing",
     from: "",
     to: "",
-    last_port: "batu ampar",
-    next_port: "batu ampar",
+    last_port: "",
+    next_port: "",
     pilot: "",
     pilot_on: "",
     pilot_off: "",
-    tug_service_id: 2,
+    tug_service_id: "",
     note: "",
-    status: "DRAFT",
+    status: "",
     amount: "",
     submited_by: "",
     created_by: "",
+    grt:"",
+    bup:"",
   });
 
   const handleChange = (
@@ -96,11 +98,6 @@ export default function NewServicePage() {
         <Header />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
-            {/* Page Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Tambah Pilotage Service</h1>
-              <p className="text-gray-600">Isi informasi lengkap untuk layanan pilotage baru</p>
-            </div>
 
             <div className="bg-white rounded-lg shadow">
               <form onSubmit={handleSubmit} className="p-6 space-y-8">
@@ -108,39 +105,27 @@ export default function NewServicePage() {
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                     <Ship className="w-5 h-5 mr-2 text-blue-600" />
-                    Informasi Kapal
+                    Informasi Kegiatan
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                     <div>
-                      <label htmlFor="ship_name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Nama Kapal *
+                      <label htmlFor="id_jasa" className="block text-sm font-medium text-gray-700 mb-2">
+                        ID Jasa *
                       </label>
                       <input
-                        type="text"
-                        id="ship_name"
-                        name="ship_name"
-                        value={form.ship_name}
+                        id="id_jasa"
+                        name="id_jasa"
+                        value={form.id_jasa}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onBlur={handleNumberBlur}
+                        className="px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="master" className="block text-sm font-medium text-gray-700 mb-2">
-                        Master
-                      </label>
-                      <input
-                        type="text"
-                        id="master"
-                        name="master"
-                        value={form.master}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        step="any"
                       />
                     </div>
 
-                    <div>
+                    <br></br><div>
                       <label htmlFor="agency" className="block text-sm font-medium text-gray-700 mb-2">
                         Agency
                       </label>
@@ -155,19 +140,16 @@ export default function NewServicePage() {
                     </div>
 
                     <div>
-                      <label htmlFor="loa" className="block text-sm font-medium text-gray-700 mb-2">
-                        LOA (m)
+                      <label htmlFor="bup" className="block text-sm font-medium text-gray-700 mb-2">
+                        BUP
                       </label>
                       <input
-                        type="number"
-                        id="loa"
-                        name="loa"
-                        value={form.loa}
+                        type="text"
+                        id="bup"
+                        name="bup"
+                        value={form.bup}
                         onChange={handleChange}
-                        onBlur={handleNumberBlur}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                        step="any"
                       />
                     </div>
                   </div>
@@ -175,55 +157,18 @@ export default function NewServicePage() {
 
                 {/* Service Details Section */}
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <Package className="w-5 h-5 mr-2 text-blue-600" />
-                    Detail Layanan
-                  </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="doc_number" className="block text-sm font-medium text-gray-700 mb-2">
-                        Doc Number *
-                      </label>
-                      <input
-                        type="number"
-                        id="doc_number"
-                        name="doc_number"
-                        value={form.doc_number}
-                        onChange={handleChange}
-                        onBlur={handleNumberBlur}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                        step="any"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="id_jasa" className="block text-sm font-medium text-gray-700 mb-2">
-                        ID Jasa *
-                      </label>
-                      <input
-                        type="number"
-                        id="id_jasa"
-                        name="id_jasa"
-                        value={form.id_jasa}
-                        onChange={handleChange}
-                        onBlur={handleNumberBlur}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                        step="any"
-                      />
-                    </div>
 
                     <div>
                       <label htmlFor="activity" className="block text-sm font-medium text-gray-700 mb-2">
-                        Aktivitas
+                        kegiatan
                       </label>
                       <select
                         id="activity"
                         name="activity"
                         value={form.activity}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className=" px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="Berthing">Berthing</option>
                         <option value="Unberthing">Unberthing</option>
@@ -231,31 +176,12 @@ export default function NewServicePage() {
                         <option value="Shifting">Shifting</option>
                       </select>
                     </div>
-
-                    <div>
-                      <label htmlFor="tug_service_id" className="block text-sm font-medium text-gray-700 mb-2">
-                        Tug Service ID
-                      </label>
-                      <input
-                        type="number"
-                        id="tug_service_id"
-                        name="tug_service_id"
-                        value={form.tug_service_id}
-                        onChange={handleChange}
-                        onBlur={handleNumberBlur}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        step="any"
-                      />
-                    </div>
                   </div>
                 </div>
+                
 
                 {/* Location & Ports Section */}
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <MapPin className="w-5 h-5 mr-2 text-blue-600" />
-                    Lokasi & Pelabuhan
-                  </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="from" className="block text-sm font-medium text-gray-700 mb-2">
@@ -323,6 +249,66 @@ export default function NewServicePage() {
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
+                      <label htmlFor="ship_name" className="block text-sm font-medium text-gray-700 mb-2">
+                        Nama Kapal *
+                      </label>
+                      <input
+                        type="text"
+                        id="ship_name"
+                        name="ship_name"
+                        value={form.ship_name}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="master" className="block text-sm font-medium text-gray-700 mb-2">
+                        Master
+                      </label>
+                      <input
+                        type="text"
+                        id="master"
+                        name="master"
+                        value={form.master}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="grt" className="block text-sm font-medium text-gray-700 mb-2">
+                        GRT
+                      </label>
+                      <input
+                        type="text"
+                        id="grt"
+                        name="grt"
+                        value={form.grt}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="loa" className="block text-sm font-medium text-gray-700 mb-2">
+                        LOA (m)
+                      </label>
+                      <input
+                        type="number"
+                        id="loa"
+                        name="loa"
+                        value={form.loa}
+                        onChange={handleChange}
+                        onBlur={handleNumberBlur}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0"
+                        step="any"
+                      />
+                    </div>
+
+                    <div>
                       <label htmlFor="pilot" className="block text-sm font-medium text-gray-700 mb-2">
                         Pilot
                       </label>
@@ -353,85 +339,6 @@ export default function NewServicePage() {
                       />
                     </div>
 
-                    <div>
-                      <label htmlFor="pilot_on" className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilot On
-                      </label>
-                      <input
-                        type="datetime-local"
-                        id="pilot_on"
-                        name="pilot_on"
-                        value={form.pilot_on}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="pilot_off" className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilot Off
-                      </label>
-                      <input
-                        type="datetime-local"
-                        id="pilot_off"
-                        name="pilot_off"
-                        value={form.pilot_off}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Information Section */}
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <Calendar className="w-5 h-5 mr-2 text-blue-600" />
-                    Informasi Tambahan
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="submited_by" className="block text-sm font-medium text-gray-700 mb-2">
-                        Submitted By
-                      </label>
-                      <input
-                        type="text"
-                        id="submited_by"
-                        name="submited_by"
-                        value={form.submited_by}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="created_by" className="block text-sm font-medium text-gray-700 mb-2">
-                        Created By
-                      </label>
-                      <input
-                        type="text"
-                        id="created_by"
-                        name="created_by"
-                        value={form.created_by}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-2">
-                      Catatan
-                    </label>
-                    <textarea
-                      id="note"
-                      name="note"
-                      rows={4}
-                      value={form.note}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Tambahkan catatan tambahan..."
-                    />
                   </div>
                 </div>
 
