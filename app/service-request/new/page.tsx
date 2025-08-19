@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Ship, MapPin, User, Calendar, Clock, Package } from "lucide-react";
+import { Ship, MapPin, User, Calendar, Clock, Package, Plus, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 
 export default function NewServicePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [detailForms, setDetailForms] = useState<Array<{ id: number }>>([]);
+  
   const [form, setForm] = useState({
     doc_number: "",
     id_jasa: "",
@@ -32,14 +34,17 @@ export default function NewServicePage() {
     created_by: "",
     grt:"",
     bup:"",
+    time:"",
+    date:"",
   });
+
+  const [detailData, setDetailData] = useState<Record<number, any>>({});
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
-    // For number fields, allow direct input without incrementing
     if (name === "doc_number" || name === "id_jasa" || name === "loa" || 
         name === "tug_service_id" || name === "amount") {
       setForm({ ...form, [name]: value });
@@ -48,11 +53,60 @@ export default function NewServicePage() {
     }
   };
 
+  const handleDetailChange = (id: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setDetailData(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [name]: value
+      }
+    }));
+  };
+
   const handleNumberBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (value !== "") {
       setForm({ ...form, [name]: Number(value) });
     }
+  };
+
+  const handleDetailNumberBlur = (id: number, e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (value !== "") {
+      setDetailData(prev => ({
+        ...prev,
+        [id]: {
+          ...prev[id],
+          [name]: Number(value)
+        }
+      }));
+    }
+  };
+
+  const addDetailForm = () => {
+    const newId = Date.now();
+    setDetailForms(prev => [...prev, { id: newId }]);
+    setDetailData(prev => ({
+      ...prev,
+      [newId]: {
+        ship_name: "",
+        master: "",
+        grt: "",
+        loa: "",
+        pilot: "",
+        amount: ""
+      }
+    }));
+  };
+
+  const removeDetailForm = (id: number) => {
+    setDetailForms(prev => prev.filter(form => form.id !== id));
+    setDetailData(prev => {
+      const newData = { ...prev };
+      delete newData[id];
+      return newData;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,6 +120,7 @@ export default function NewServicePage() {
       loa: form.loa ? Number(form.loa) : 0,
       tug_service_id: form.tug_service_id ? Number(form.tug_service_id) : 0,
       amount: form.amount ? Number(form.amount) : 0,
+      details: Object.values(detailData)
     };
 
     try {
@@ -108,10 +163,9 @@ export default function NewServicePage() {
                     Informasi Kegiatan
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                     <div>
                       <label htmlFor="id_jasa" className="block text-sm font-medium text-gray-700 mb-2">
-                        ID Jasa *
+                        ID Jasa
                       </label>
                       <input
                         id="id_jasa"
@@ -119,13 +173,13 @@ export default function NewServicePage() {
                         value={form.id_jasa}
                         onChange={handleChange}
                         onBlur={handleNumberBlur}
-                        className="px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                         step="any"
                       />
                     </div>
-
-                    <br></br><div>
+<br></br>
+                    <div>
                       <label htmlFor="agency" className="block text-sm font-medium text-gray-700 mb-2">
                         Agency
                       </label>
@@ -157,8 +211,7 @@ export default function NewServicePage() {
 
                 {/* Service Details Section */}
                 <div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label htmlFor="activity" className="block text-sm font-medium text-gray-700 mb-2">
                         kegiatan
@@ -168,7 +221,7 @@ export default function NewServicePage() {
                         name="activity"
                         value={form.activity}
                         onChange={handleChange}
-                        className=" px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="Berthing">Berthing</option>
                         <option value="Unberthing">Unberthing</option>
@@ -176,9 +229,36 @@ export default function NewServicePage() {
                         <option value="Shifting">Shifting</option>
                       </select>
                     </div>
+                    <div>
+                      <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+                        tanggal
+                      </label>
+                      <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value={form.date}
+                        onChange={handleChange}
+                        className="relative px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
+                        waktu
+                      </label>
+                      <input
+                        type="time"
+                        id="time"
+                        name="time"
+                        value={form.time}
+                        onChange={handleChange}
+                        className="px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
-                
 
                 {/* Location & Ports Section */}
                 <div>
@@ -241,105 +321,122 @@ export default function NewServicePage() {
                   </div>
                 </div>
 
-                {/* Pilot & Timing Section */}
+                {/* Dynamic Detail Forms Section */}
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                    <User className="w-5 h-5 mr-2 text-blue-600" />
-                    Pilot & Waktu
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="ship_name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Nama Kapal *
-                      </label>
-                      <input
-                        type="text"
-                        id="ship_name"
-                        name="ship_name"
-                        value={form.ship_name}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="master" className="block text-sm font-medium text-gray-700 mb-2">
-                        Master
-                      </label>
-                      <input
-                        type="text"
-                        id="master"
-                        name="master"
-                        value={form.master}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="grt" className="block text-sm font-medium text-gray-700 mb-2">
-                        GRT
-                      </label>
-                      <input
-                        type="text"
-                        id="grt"
-                        name="grt"
-                        value={form.grt}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="loa" className="block text-sm font-medium text-gray-700 mb-2">
-                        LOA (m)
-                      </label>
-                      <input
-                        type="number"
-                        id="loa"
-                        name="loa"
-                        value={form.loa}
-                        onChange={handleChange}
-                        onBlur={handleNumberBlur}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                        step="any"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="pilot" className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilot
-                      </label>
-                      <input
-                        type="text"
-                        id="pilot"
-                        name="pilot"
-                        value={form.pilot}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-                        Amount
-                      </label>
-                      <input
-                        type="number"
-                        id="amount"
-                        name="amount"
-                        value={form.amount}
-                        onChange={handleChange}
-                        onBlur={handleNumberBlur}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0.00"
-                        step="any"
-                      />
-                    </div>
-
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                      <User className="w-5 h-5 mr-2 text-blue-600" />
+                      Detail Kapal
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={addDetailForm}
+                      className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Tambah Detail Kapal</span>
+                    </button>
                   </div>
+
+                  {detailForms.map((formItem) => (
+                    <div key={formItem.id} className="border border-gray-200 rounded-lg p-4 mb-4 relative">
+                      <button
+                        type="button"
+                        onClick={() => removeDetailForm(formItem.id)}
+                        className="absolute top-2 right-2 p-1 text-red-600 hover:text-red-800"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Nama Kapal
+                          </label>
+                          <input
+                            type="text"
+                            name="ship_name"
+                            value={detailData[formItem.id]?.ship_name || ""}
+                            onChange={(e) => handleDetailChange(formItem.id, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Master
+                          </label>
+                          <input
+                            type="text"
+                            name="master"
+                            value={detailData[formItem.id]?.master || ""}
+                            onChange={(e) => handleDetailChange(formItem.id, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            GRT
+                          </label>
+                          <input
+                            type="text"
+                            name="grt"
+                            value={detailData[formItem.id]?.grt || ""}
+                            onChange={(e) => handleDetailChange(formItem.id, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            LOA (m)
+                          </label>
+                          <input
+                            type="number"
+                            name="loa"
+                            value={detailData[formItem.id]?.loa || ""}
+                            onChange={(e) => handleDetailChange(formItem.id, e)}
+                            onBlur={(e) => handleDetailNumberBlur(formItem.id, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            step="any"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Pilot
+                          </label>
+                          <input
+                            type="text"
+                            name="pilot"
+                            value={detailData[formItem.id]?.pilot || ""}
+                            onChange={(e) => handleDetailChange(formItem.id, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Amount
+                          </label>
+                          <input
+                            type="number"
+                            name="amount"
+                            value={detailData[formItem.id]?.amount || ""}
+                            onChange={(e) => handleDetailChange(formItem.id, e)}
+                            onBlur={(e) => handleDetailNumberBlur(formItem.id, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            step="any"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {detailForms.length === 0 && (
+                    <p className="text-gray-500 text-center py-4">Belum ada detail kapal ditambahkan</p>
+                  )}
                 </div>
 
                 {/* Form Actions */}
